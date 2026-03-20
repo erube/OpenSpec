@@ -156,3 +156,8 @@ opencode.json
 
 # Codex
 .codex/
+
+# OpenSpec task database (legacy per-project location)
+openspec/.openspec.db
+openspec/.openspec.db-wal
+openspec/.openspec.db-shm

@@ -43,6 +43,10 @@ rules:
   specs:
     - Use Given/When/Then format
     - Reference existing patterns before inventing new ones
+
+# Optional: task management settings
+taskStorage: sqlite      # "markdown" (default) or "sqlite"
+projectId: my-api        # Override project name (default: directory basename)
 ```
 
 ### How It Works
@@ -88,6 +92,32 @@ When OpenSpec needs a schema, it checks in this order:
 2. Change metadata (`.openspec.yaml` in the change folder)
 3. Project config (`openspec/config.yaml`)
 4. Default (`spec-driven`)
+
+---
+
+## Task Storage
+
+By default, tasks are managed directly in `tasks.md` checkboxes. For projects with concurrent AI agents or when you need cross-project task monitoring, you can opt into SQLite-backed task storage.
+
+### Markdown Mode (Default)
+
+Tasks live in `tasks.md`. Simple, git-friendly, no extra dependencies. Task commands (`openspec task list`, `openspec task done`) read and write the file directly.
+
+### SQLite Mode
+
+Enable by adding `taskStorage: sqlite` to your config. Tasks are stored in a global database at `~/.config/openspec/tasks.db`, shared across all SQLite-enabled projects.
+
+```yaml
+taskStorage: sqlite
+projectId: my-api    # optional: override directory basename
+```
+
+Benefits:
+- **Atomic task claiming** — concurrent agents can safely claim different tasks via `openspec task claim`
+- **Cross-project visibility** — `openspec task progress --all --global` shows progress across all projects
+- **tasks.md preserved** — still maintained as a human-readable snapshot via writeback
+
+Note: `openspec task claim` and `openspec task release` require SQLite mode. In markdown mode, these commands return an error with guidance to enable SQLite.
 
 ---
 

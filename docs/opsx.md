@@ -104,6 +104,15 @@ rules:
 | `schema` | string | Default schema for new changes (e.g., `spec-driven`) |
 | `context` | string | Project context injected into all artifact instructions |
 | `rules` | object | Per-artifact rules, keyed by artifact ID |
+| `taskStorage` | `"markdown"` \| `"sqlite"` | Task management mode (default: `"markdown"`) |
+| `projectId` | string | Override project identity for task storage (default: directory basename) |
+
+**Task storage modes:**
+
+- `markdown` (default) — Tasks are managed directly in `tasks.md` checkboxes. Simple, git-friendly, no dependencies.
+- `sqlite` — Tasks are stored in a global SQLite database at `~/.config/openspec/tasks.db`. Enables atomic task claiming for concurrent agents and cross-project task visibility.
+
+When using `sqlite` mode, `tasks.md` is still maintained as a human-readable snapshot via writeback.
 
 ### How It Works
 

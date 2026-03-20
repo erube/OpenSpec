@@ -16,6 +16,9 @@ import { z } from 'zod';
  * - Single source of truth for type and validation
  * - Consistent with other OpenSpec schemas
  */
+export const TaskStorageEnum = z.enum(['markdown', 'sqlite']);
+export type TaskStorage = z.infer<typeof TaskStorageEnum>;
+
 export const ProjectConfigSchema = z.object({
   // Required: which schema to use (e.g., "spec-driven", or project-local schema name)
   schema: z
@@ -38,6 +41,18 @@ export const ProjectConfigSchema = z.object({
     )
     .optional()
     .describe('Per-artifact rules, keyed by artifact ID'),
+
+  // Optional: task storage mode ("markdown" or "sqlite", default: "markdown")
+  taskStorage: TaskStorageEnum
+    .optional()
+    .describe('Task storage mode: "markdown" (default) or "sqlite" (global DB)'),
+
+  // Optional: override auto-detected project name for task storage
+  projectId: z
+    .string()
+    .min(1)
+    .optional()
+    .describe('Override project identity (defaults to directory basename)'),
 });
 
 export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;
@@ -149,6 +164,26 @@ export function readProjectConfig(projectRoot: string): ProjectConfig | null {
         }
       } else {
         console.warn(`Invalid 'rules' field in config (must be object)`);
+      }
+    }
+
+    // Parse taskStorage field
+    if (raw.taskStorage !== undefined) {
+      const taskStorageResult = TaskStorageEnum.safeParse(raw.taskStorage);
+      if (taskStorageResult.success) {
+        config.taskStorage = taskStorageResult.data;
+      } else {
+        console.warn(`Invalid 'taskStorage' field in config (must be "markdown" or "sqlite")`);
+      }
+    }
+
+    // Parse projectId field
+    if (raw.projectId !== undefined) {
+      const projectIdResult = z.string().min(1).safeParse(raw.projectId);
+      if (projectIdResult.success) {
+        config.projectId = projectIdResult.data;
+      } else {
+        console.warn(`Invalid 'projectId' field in config (must be non-empty string)`);
       }
     }
 

@@ -482,6 +482,117 @@ rules:
     });
   });
 
+  describe('taskStorage field', () => {
+    it('should parse valid taskStorage "sqlite"', () => {
+      const configDir = path.join(tempDir, 'openspec');
+      fs.mkdirSync(configDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(configDir, 'config.yaml'),
+        'schema: spec-driven\ntaskStorage: sqlite\n',
+      );
+
+      const config = readProjectConfig(tempDir);
+      expect(config?.taskStorage).toBe('sqlite');
+      expect(consoleWarnSpy).not.toHaveBeenCalled();
+    });
+
+    it('should parse valid taskStorage "markdown"', () => {
+      const configDir = path.join(tempDir, 'openspec');
+      fs.mkdirSync(configDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(configDir, 'config.yaml'),
+        'schema: spec-driven\ntaskStorage: markdown\n',
+      );
+
+      const config = readProjectConfig(tempDir);
+      expect(config?.taskStorage).toBe('markdown');
+    });
+
+    it('should warn on invalid taskStorage value', () => {
+      const configDir = path.join(tempDir, 'openspec');
+      fs.mkdirSync(configDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(configDir, 'config.yaml'),
+        'schema: spec-driven\ntaskStorage: redis\n',
+      );
+
+      const config = readProjectConfig(tempDir);
+      expect(config?.taskStorage).toBeUndefined();
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Invalid \'taskStorage\' field'),
+      );
+    });
+
+    it('should omit taskStorage when not present', () => {
+      const configDir = path.join(tempDir, 'openspec');
+      fs.mkdirSync(configDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(configDir, 'config.yaml'),
+        'schema: spec-driven\n',
+      );
+
+      const config = readProjectConfig(tempDir);
+      expect(config?.taskStorage).toBeUndefined();
+    });
+  });
+
+  describe('projectId field', () => {
+    it('should parse valid projectId', () => {
+      const configDir = path.join(tempDir, 'openspec');
+      fs.mkdirSync(configDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(configDir, 'config.yaml'),
+        'schema: spec-driven\nprojectId: my-api\n',
+      );
+
+      const config = readProjectConfig(tempDir);
+      expect(config?.projectId).toBe('my-api');
+      expect(consoleWarnSpy).not.toHaveBeenCalled();
+    });
+
+    it('should warn on empty projectId', () => {
+      const configDir = path.join(tempDir, 'openspec');
+      fs.mkdirSync(configDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(configDir, 'config.yaml'),
+        'schema: spec-driven\nprojectId: ""\n',
+      );
+
+      const config = readProjectConfig(tempDir);
+      expect(config?.projectId).toBeUndefined();
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Invalid \'projectId\' field'),
+      );
+    });
+
+    it('should warn on non-string projectId', () => {
+      const configDir = path.join(tempDir, 'openspec');
+      fs.mkdirSync(configDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(configDir, 'config.yaml'),
+        'schema: spec-driven\nprojectId: 123\n',
+      );
+
+      const config = readProjectConfig(tempDir);
+      expect(config?.projectId).toBeUndefined();
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Invalid \'projectId\' field'),
+      );
+    });
+
+    it('should omit projectId when not present', () => {
+      const configDir = path.join(tempDir, 'openspec');
+      fs.mkdirSync(configDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(configDir, 'config.yaml'),
+        'schema: spec-driven\n',
+      );
+
+      const config = readProjectConfig(tempDir);
+      expect(config?.projectId).toBeUndefined();
+    });
+  });
+
   describe('validateConfigRules', () => {
     it('should return no warnings for valid artifact IDs', () => {
       const rules = {

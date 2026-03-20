@@ -1,5 +1,7 @@
 schema: spec-driven
 
+taskStorage: sqlite
+
 context: |
   Tech stack: TypeScript, Node.js (≥20.19.0), ESM modules
   Package manager: pnpm
